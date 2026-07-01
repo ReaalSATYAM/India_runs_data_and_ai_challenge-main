@@ -1,4 +1,3 @@
-
 """
 Redrob Hackathon — Intelligent Candidate Discovery & Ranking Challenge.
 
@@ -386,8 +385,18 @@ def skill_trust_score(cand, ev):
             corro = 0.35
         elif cat == "rank" and ev["rank"] == 0:
             corro = 0.35
-        elif cat == "nlp" and ev["nlp"] == 0:
-            corro = 0.45
+        elif cat == "nlp":
+            # ev["nlp"] counts *distinct matched patterns*, not occurrences. A
+            # single hedged/offhand "LLM" mention ("exploring how LLMs can
+            # streamline workflows", "played with the OpenAI API") satisfied the
+            # old `==0` check and bought full (1.0) corroboration credit for any
+            # NLP-tagged skill -- including on profiles with zero retrieval/rank/
+            # production evidence. Require >=2 distinct NLP-evidence patterns
+            # before trusting the skill at full weight.
+            if ev["nlp"] == 0:
+                corro = 0.45
+            elif ev["nlp"] == 1:
+                corro = 0.60
         elif cat in ("ml", "py") and ev["score"] < 0.05:
             corro = 0.6
         contrib = raw * corro
@@ -508,6 +517,31 @@ def consistency_gate(cand):
 
 
 # --------------------------------------------------------------------------- #
+# notice_period: JD-explicit signal, previously read but never scored
+# --------------------------------------------------------------------------- #
+def notice_score(sig):
+    """JD: 'We'd love sub-30-day notice. We can buy out up to 30 days. 30+ day
+    notice candidates are still in scope but the bar gets higher.'
+
+    Graded, not a cliff: full credit through the 30-day buyout window the JD
+    itself offers, then a ramp down to a floor -- never zero, because the JD
+    explicitly keeps 30+ day candidates in scope, just at a higher bar.
+    Missing data defaults to 90 (the pool's actual median notice_period_days),
+    consistent with this codebase's existing convention of defaulting absent
+    signals conservatively rather than assuming the best case.
+    """
+    notice = sig.get("notice_period_days", 90)
+    if notice is None:
+        notice = 90
+    notice = clamp(float(notice), 0.0, 365.0)
+    if notice <= 30:
+        return 1.0
+    if notice <= 90:
+        return 1.0 - (notice - 30) * (0.35 / 60.0)                  # 1.00 -> 0.65
+    return clamp(0.65 - (notice - 90) * (0.35 / 60.0), 0.30, 0.65)  # 0.65 -> 0.30 by 150d
+
+
+# --------------------------------------------------------------------------- #
 # behavioral_modifier: bounded availability factor [0.6, 1.1]
 # --------------------------------------------------------------------------- #
 def behavioral_modifier(cand):
@@ -528,10 +562,11 @@ def behavioral_modifier(cand):
     resp_time = clamp(1.0 - (art - 48) / 192.0, 0.0, 1.0) if art > 48 else 1.0
     gh = sig.get("github_activity_score", -1)
     gh_norm = 0.5 if (gh is None or gh < 0) else clamp(gh / 50.0, 0.0, 1.0)  # -1 = neutral
+    notice = notice_score(sig)
 
-    b = (0.28 * resp + 0.22 * recency + 0.10 * otw + 0.10 * icr
-         + 0.08 * completeness + 0.06 * saved + 0.06 * verified
-         + 0.05 * resp_time + 0.05 * gh_norm)
+    b = (0.26 * resp + 0.20 * recency + 0.09 * otw + 0.09 * icr
+         + 0.07 * completeness + 0.05 * saved + 0.05 * verified
+         + 0.05 * resp_time + 0.05 * gh_norm + 0.09 * notice)
     return clamp(0.6 + 0.5 * b, 0.6, 1.1), days
 
 
@@ -562,7 +597,7 @@ def score_candidate(cand):
         "fit": fit, "skill": skill, "exp": exp, "loc": loc, "lex": lex,
         "beh": beh, "gate": gate, "flags": flags,
         "top_skills": top_skills, "ev": {k: ev[k] for k in
-            ("retr", "rank", "vdb", "eval", "prod", "nlp", "has_production", "has_nlp_ir")},
+            ("retr", "rank", "vdb", "eval", "prod", "nlp", "has_production", "has_nlp_ir", "text")},
         "inactive_days": inactive_days,
         "notice": cand.get("redrob_signals", {}).get("notice_period_days", None),
         "resp": cand.get("redrob_signals", {}).get("recruiter_response_rate", None),
@@ -574,14 +609,110 @@ def score_candidate(cand):
 # --------------------------------------------------------------------------- #
 # Reasoning generation (deterministic, fact-grounded, rank-aware)
 # --------------------------------------------------------------------------- #
+# Specificity-ordered (matched substring, display phrase) lookups used to name
+# the *actual* matched technology/method instead of one fixed string per
+# evidence category. Previously every candidate whose evidence fell in the
+# retr/vdb bucket -- which, by construction, is most of a top-50 for this JD --
+# got the identical literal string "built embedding/retrieval systems",
+# regardless of whether their text said FAISS, hybrid search, BM25, or plain
+# "embeddings". That read as templated even though each instance was
+# individually true. This picks the most specific term actually present.
+RETRIEVAL_DISPLAY = [
+    ("hybrid search", "hybrid search"),
+    ("dense retrieval", "dense retrieval"),
+    ("semantic search", "semantic search"),
+    ("two-tower", "two-tower retrieval"),
+    ("two tower", "two-tower retrieval"),
+    ("vector search", "vector search"),
+    ("nearest neighbor", "nearest-neighbor search"),
+    ("nearest-neighbor", "nearest-neighbor search"),
+    ("bm25", "BM25 retrieval"),
+    ("embedding-based", "embedding-based retrieval"),
+    ("embedding based", "embedding-based retrieval"),
+    ("embeddings", "embedding-based retrieval"),
+    ("ann ", "ANN search"),
+    ("retrieval", "retrieval systems"),
+]
+VDB_DISPLAY = {
+    "faiss": "FAISS", "pinecone": "Pinecone", "milvus": "Milvus", "weaviate": "Weaviate",
+    "qdrant": "Qdrant", "opensearch": "OpenSearch", "elasticsearch": "Elasticsearch",
+    "elastic search": "Elasticsearch", "vespa": "Vespa",
+}
+RANKING_DISPLAY = [
+    ("learning to rank", "learning-to-rank"),
+    ("learning-to-rank", "learning-to-rank"),
+    ("ltr", "learning-to-rank"),
+    ("re-rank", "re-ranking"),
+    ("rerank", "re-ranking"),
+    ("candidate ranking", "candidate ranking"),
+    ("matching system", "candidate matching"),
+    ("discovery feed", "feed ranking"),
+    ("personaliz", "personalization"),
+    ("recommender", "recommender systems"),
+    ("recommendation", "recommendation systems"),
+    ("relevance", "relevance ranking"),
+    ("ranking", "ranking systems"),
+]
+NLP_DISPLAY = [
+    ("question answering", "question-answering systems"),
+    ("named entity", "named-entity extraction"),
+    ("text classification", "text classification"),
+    ("sentence-transformer", "sentence-transformer models"),
+    ("sentence transformer", "sentence-transformer models"),
+    ("bert", "BERT-based models"),
+    ("transformer", "transformer models"),
+    ("language model", "language models"),
+    ("llm", "LLM-based systems"),
+    ("natural language", "NLP systems"),
+    ("nlp", "NLP systems"),
+]
+EVAL_DISPLAY = [
+    ("ndcg", "NDCG"),
+    ("mrr", "MRR"),
+    ("map@", "MAP"),
+    ("mean average precision", "mean average precision"),
+    ("relevance judgment", "relevance-judgment review"),
+    ("relevance judgement", "relevance-judgment review"),
+    ("a/b test", "A/B testing"),
+    ("ab test", "A/B testing"),
+    ("a/b-test", "A/B testing"),
+    ("offline-online", "offline/online correlation checks"),
+    ("offline/online", "offline/online correlation checks"),
+    ("offline to online", "offline/online correlation checks"),
+    ("click-through", "click-through/CTR analysis"),
+    ("ctr", "click-through/CTR analysis"),
+    ("evaluation framework", "a formal eval framework"),
+    ("offline metric", "offline ranking metrics"),
+]
+
+
+def _pick_display(text, priority_list):
+    for term, label in priority_list:
+        if term in text:
+            return label
+    return None
+
+
 def evidence_phrase(card):
     ev = card["ev"]
+    text = ev.get("text", "")
+
+    if ev["vdb"]:
+        names = [VDB_DISPLAY[t] for t in VDB_DISPLAY if t in text]
+        if names:
+            return f"built {'/'.join(names[:2])}-based retrieval"
     if ev["retr"] or ev["vdb"]:
-        return "built embedding/retrieval systems"
+        label = _pick_display(text, RETRIEVAL_DISPLAY)
+        if label:
+            return f"built {label}"
     if ev["rank"]:
-        return "shipped ranking/recommendation systems"
+        label = _pick_display(text, RANKING_DISPLAY)
+        if label:
+            return f"shipped {label}"
     if ev["nlp"]:
-        return "production NLP work"
+        label = _pick_display(text, NLP_DISPLAY)
+        if label:
+            return f"built {label}"
     return "applied ML work"
 
 
@@ -605,9 +736,20 @@ def make_reasoning(card, rank):
     if card["top_skills"]:
         parts.append("strengths: " + ", ".join(card["top_skills"][:3]))
 
-    # Evaluation-rigor / product signal when present (JD priorities).
+    # Evaluation-rigor / product signal when present (JD priorities). Names the
+    # specific method(s) actually found instead of one fixed clause for every row.
     if card["ev"]["eval"]:
-        parts.append("shows ranking-evaluation experience (A/B, offline metrics)")
+        text = card["ev"].get("text", "")
+        methods = []
+        for term, label in EVAL_DISPLAY:
+            if term in text and label not in methods:
+                methods.append(label)
+            if len(methods) >= 2:
+                break
+        if methods:
+            parts.append(f"shows evaluation rigor ({', '.join(methods)})")
+        else:
+            parts.append("shows ranking-evaluation experience")
 
     # Location relevance.
     loc = card["location"]
@@ -627,7 +769,7 @@ def make_reasoning(card, rank):
         concerns.append("non-engineering title; AI skills not corroborated by role history")
     if card["cls"] == "generic" and card["fit"] < 0.45:
         concerns.append("generic SWE background, limited retrieval/ranking evidence")
-    if isinstance(card["notice"], (int, float)) and card["notice"] >= 90:
+    if isinstance(card["notice"], (int, float)) and card["notice"] > 30:
         concerns.append(f"{int(card['notice'])}d notice")
     if card["inactive_days"] is not None and card["inactive_days"] > 150:
         concerns.append(f"inactive ~{card['inactive_days']}d")
