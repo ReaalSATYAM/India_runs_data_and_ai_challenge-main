@@ -1,0 +1,113 @@
+N=100000
+--- TOP 60 TITLES ---
+  5833  Business Analyst
+  5830  HR Manager
+  5791  Mechanical Engineer
+  5764  Accountant
+  5754  Project Manager
+  5750  Customer Support
+  5744  Operations Manager
+  5727  Content Writer
+  5713  Sales Executive
+  5702  Civil Engineer
+  5689  Graphic Designer
+  5524  Marketing Manager
+  3450  Software Engineer
+  2873  Full Stack Developer
+  2836  Cloud Engineer
+  2809  Java Developer
+  2788  .NET Developer
+  2787  DevOps Engineer
+  2757  Mobile Developer
+  2738  Frontend Engineer
+  2682  QA Engineer
+   764  Analytics Engineer
+   744  Data Engineer
+   728  Data Analyst
+   704  Backend Engineer
+   687  Senior Data Engineer
+   653  Senior Software Engineer
+   167  ML Engineer
+   153  AI Research Engineer
+   145  Data Scientist
+   142  Senior Software Engineer (ML)
+   132  Computer Vision Engineer
+   131  Junior ML Engineer
+   130  AI Specialist
+    26  Recommendation Systems Engineer
+    24  Machine Learning Engineer
+    23  Applied ML Engineer
+    23  Search Engineer
+    21  AI Engineer
+    19  Senior Data Scientist
+    14  NLP Engineer
+     6  Senior NLP Engineer
+     6  Senior Machine Learning Engineer
+     6  Staff Machine Learning Engineer
+     4  Senior AI Engineer
+     4  Senior Applied Scientist
+     3  Lead AI Engineer
+--- TOP 15 COUNTRIES ---
+ 75113  India
+  9978  USA
+  2579  Australia
+  2506  Canada
+  2472  UK
+  2469  Germany
+  2453  Singapore
+  2430  UAE
+--- TOP 25 LOCATIONS ---
+  4321  Bhubaneswar, Odisha
+  4283  Noida, Uttar Pradesh
+  4283  Hyderabad, Telangana
+  4268  Jaipur, Rajasthan
+  4238  Bangalore, Karnataka
+  4230  Kolkata, West Bengal
+  4198  Indore, Madhya Pradesh
+  4186  Pune, Maharashtra
+  4164  Chennai, Tamil Nadu
+  4161  Delhi, Delhi
+  4151  Trivandrum, Kerala
+  4143  Ahmedabad, Gujarat
+  4128  Chandigarh, Chandigarh
+  4113  Coimbatore, Tamil Nadu
+  4093  Vizag, Andhra Pradesh
+  4073  Kochi, Kerala
+  4043  Mumbai, Maharashtra
+  4037  Gurgaon, Haryana
+  2579  Sydney
+  2536  San Francisco
+  2531  Austin
+  2518  New York
+  2506  Toronto
+  2472  London
+  2469  Berlin
+--- TOP 20 INDUSTRIES ---
+ 29881  IT Services
+ 22417  Software
+ 22305  Manufacturing
+  7571  Conglomerate
+  7467  Paper Products
+  2808  Fintech
+  2514  Food Delivery
+  1529  E-commerce
+  1274  Consulting
+   610  EdTech
+   328  SaaS
+   278  AI/ML
+   172  AdTech
+   162  Transportation
+   155  Insurance Tech
+   149  Gaming
+   147  HealthTech
+    68  HealthTech AI
+    62  Conversational AI
+    42  AI Services
+years_of_experience: min=1.00 p10=2.20 p50=6.80 p90=13.00 max=16.90 mean=7.17
+n_skills: min=5.00 p10=6.00 p50=9.00 p90=14.00 max=23.00 mean=9.60
+recruiter_response_rate: min=0.02 p10=0.14 p50=0.44 p90=0.73 max=0.95 mean=0.44
+github_activity_score: min=-1.00 p10=-1.00 p50=-1.00 p90=40.40 max=96.90 mean=9.62
+notice_period_days: min=0.00 p10=30.00 p50=90.00 p90=150.00 max=150.00 mean=87.39
+salary_max_lpa: min=6.00 p10=9.20 p50=19.40 p90=30.00 max=74.50 mean=19.84
+last_active range: min=2025-09-29 max=2026-05-27
+crude_honeypot_heuristic_hits=45 examples=['CAND_0001610', 'CAND_0003582', 'CAND_0007353', 'CAND_0008960', 'CAND_0010294']
