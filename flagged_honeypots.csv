@@ -1,0 +1,49 @@
+candidate_id,flags,title,years_of_experience
+CAND_0001610,skill_duration_overflow,Machine Learning Engineer,3.0
+CAND_0003582,expert_zero_months,Mobile Developer,8.2
+CAND_0007353,impossible_tenure,Frontend Engineer,9.9
+CAND_0008960,impossible_tenure,Graphic Designer,10.3
+CAND_0010294,impossible_tenure,.NET Developer,8.0
+CAND_0016000,expert_zero_months,Full Stack Developer,2.0
+CAND_0018515,impossible_tenure,Marketing Manager,8.5
+CAND_0029612,skill_duration_overflow,QA Engineer,1.3
+CAND_0030348,skill_duration_overflow,Machine Learning Engineer,4.5
+CAND_0032543,skill_duration_overflow,Cloud Engineer,1.1
+CAND_0033817,expert_zero_months,HR Manager,13.3
+CAND_0033972,expert_zero_months,QA Engineer,6.0
+CAND_0035104,impossible_tenure,Software Engineer,5.5
+CAND_0036839,expert_zero_months,Operations Manager,8.1
+CAND_0037539,impossible_tenure,Project Manager,4.9
+CAND_0040075,impossible_tenure,Marketing Manager,15.0
+CAND_0040853,impossible_tenure,Operations Manager,1.1
+CAND_0042245,expert_zero_months,Business Analyst,7.9
+CAND_0042453,impossible_tenure,Marketing Manager,4.2
+CAND_0043721,impossible_tenure,Sales Executive,4.5
+CAND_0046649,expert_zero_months,Business Analyst,3.8
+CAND_0046689,expert_zero_months,Business Analyst,2.3
+CAND_0048740,expert_zero_months,HR Manager,9.9
+CAND_0053734,impossible_tenure,Sales Executive,8.6
+CAND_0054823,skill_duration_overflow,QA Engineer,1.1
+CAND_0055685,impossible_tenure,Customer Support,1.4
+CAND_0055792,expert_zero_months,.NET Developer,9.8
+CAND_0056983,expert_zero_months,Accountant,12.3
+CAND_0057711,impossible_tenure,Java Developer,7.7
+CAND_0060642,expert_zero_months,Frontend Engineer,3.0
+CAND_0061722,expert_zero_months,Software Engineer,6.8
+CAND_0063888,expert_zero_months,.NET Developer,2.4
+CAND_0064077,impossible_tenure,Project Manager,10.1
+CAND_0064270,skill_duration_overflow,Applied ML Engineer,4.2
+CAND_0065096,expert_zero_months,Civil Engineer,6.7
+CAND_0065710,impossible_tenure,Marketing Manager,4.4
+CAND_0070189,impossible_tenure,Operations Manager,6.9
+CAND_0070429,expert_zero_months,Software Engineer,8.1
+CAND_0072379,expert_zero_months,Content Writer,3.8
+CAND_0073853,expert_zero_months,Operations Manager,8.0
+CAND_0077239,impossible_tenure,Content Writer,7.6
+CAND_0080867,skill_duration_overflow,Software Engineer,1.1
+CAND_0084182,impossible_tenure,Civil Engineer,12.7
+CAND_0093364,impossible_tenure,Business Analyst,7.9
+CAND_0093547,skill_duration_overflow,Senior Machine Learning Engineer,2.9
+CAND_0095140,expert_zero_months,Backend Engineer,5.0
+CAND_0095317,expert_zero_months,HR Manager,7.0
+CAND_0095480,expert_zero_months,.NET Developer,2.3
