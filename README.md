@@ -37,7 +37,7 @@ pip install streamlit pandas
 streamlit run app.py
 ```
 This will open a local web server (typically `http://localhost:8501`) where you can click a button to run the ranker and visualize the top 100 candidates alongside their generated reasoning.
-
+**Note:** Using the streamlit app will take more time to compute(80~90 sec), so using the command line is recomended for fast inferrence.   
 ## Audit & Evaluation Scripts
 - `profile_data.py`: Performs EDA on the dataset to understand distributions.
 - `audit_honeypots_full_pool.py`: Scans all 100K profiles and dumps identified honeypots to a CSV for manual inspection.
